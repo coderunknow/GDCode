@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "name": "Broken",
+    "description": "",
+    "audioTrack": 0,
+    "customSongId": 0,
+    "speed": 0,
+    "mode": 0,
+    "mini": false,
+    "dual": false,
+    "flipGravity": false,
+    "twoPlayer": false,
+    "platformer": false,
+    "colors": []
+  },
+  "objects": [
+    {"id": 1, "x": 45, "y": 75, "dsl": "block"}
+  ]
+}

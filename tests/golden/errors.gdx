@@ -1,0 +1,23 @@
+# Every line here is wrong on purpose: this pins the diagnostics output.
+level "Broken" {
+    speed: fsat
+    mode: 3
+    bg: 12
+    foo: 1
+}
+spirke 4 1
+orb 8 3
+orb yelow 8 3
+block 1 2 rott:90
+block a 2
+repeat 3 as i {
+    block i h flipX:maybe
+}
+tower(1, 2)
+define t(x) { block x 0 }
+t(1, 2)
+obj 99999 1 1
+var level = 3
+block 1 (2
+block 1 2 3
+level "Second" { }

@@ -1,0 +1,28 @@
+# Real Geometry Dash data fixture (format validation only).
+#
+# Source: decoded official RobTop level "Stereo Madness" (level id 1), taken
+# from the open geometry-dash-web-full port (JeanTheMan/geometry-dash-web-full,
+# assets/levels/1.txt): base64url -> gzip -> level string. Only the header and
+# a handful of object records are reproduced here to pin the wire format.
+#
+# What this proves for the GDCode encoder:
+#   1. Level string layout: <kS/kA header>;object;object;...;  (';' separated)
+#   2. Objects are key,value pairs with keys 1=id 2=x 3=y (+4,5,6,7..13)
+#   3. Grid convention: block id 1 at (50,0) -> x=1515 y=15  (g*30+15)
+#      spike id 8 at (17,0) -> x=525 y=15
+#      half spike id 39 present in official data
+#   4. Header keys: kS29..kS37 (legacy color channels), kA13,kA15,kA16,kA14,
+#      kA6,kA7,kA2,kA3,kA8,kA4,kA9,kA10,kA11
+
+## decoded header (verbatim, color entries abbreviated with "..."):
+kS29,1_40_2_62_3_255_4_0_5_0,kS30,1_0_2_19_3_200_4_0_5_0,kS31,1_255_2_255_3_255_4_0_5_0,kS32,1_255_2_255_3_255_4_0_5_0,kS33,1_255_2_255_3_255_4_0_5_0,kS34,1_255_2_255_3_255_4_0_5_0,kS35,1_255_2_255_3_255_4_0_5_0,kS36,1_255_2_255_3_255_4_0_5_0,kS37,1_255_2_255_3_255_4_0_5_0,kA13,0,kA15,0,kA16,0,kA14,,kA6,0,kA7,0,kA2,0,kA3,0,kA8,0,kA4,0,kA9,0,kA10,0,kA11,0
+
+## decoded object records (verbatim):
+1,29,2,135,3,135,7,158,8,3,9,255,10,10
+1,30,2,135,3,165,7,96,8,0,9,185,10,10
+1,8,2,525,3,15
+1,39,2,975,3,6
+1,8,2,1005,3,15
+1,1,2,1515,3,15
+1,1,2,1635,3,45
+1,1,2,1755,3,75

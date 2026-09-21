@@ -1,0 +1,31 @@
+# Loops, patterns, variables and randomness together.
+level "Programmable" { seed: 2024 speed: fast }
+
+var width = 12
+var gap = 4
+
+define pillar(x, h) {
+    repeat h as j {
+        block x j
+    }
+    spike x h
+}
+
+define stairs(x, n) {
+    repeat n as s {
+        pillar(x + s * 2, s + 1)
+    }
+}
+
+repeat width as i {
+    block i 0
+}
+
+stairs(width + gap, 4)
+
+repeat 5 as k {
+    var px = 40 + k * gap
+    var ph = random(1, 3)
+    pillar(px, ph)
+    orb yellow px + 2 ph + 2
+}

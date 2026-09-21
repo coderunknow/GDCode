@@ -1,0 +1,75 @@
+# Exercises every level setting and every object property.
+level "All Settings" {
+    desc: "desc \"quoted\" text"
+    song: 7
+    customSong: 1234567
+    speed: fastest
+    mode: wave
+    mini: true
+    dual: true
+    flip: true
+    twoplayer: true
+    platformer: true
+    bg: #000000
+    ground: #FFFFFF
+    line: #123456
+    object: #ABCDEF
+    seed: 99
+}
+
+block 0 0
+block 1 0 rot:90
+block 2 0 rot:-45.5 scale:2
+block 3 0 flipX:true flipY:true
+block 4 0 group:1 color:1004 layer:9 zOrder:-2
+spike 5 0
+spike half 6 0
+spike small 7 0
+spike tiny 8 0
+spike ice 9 0
+spike fake 10 0
+spike invisible 11 0
+saw 12 0
+saw large 13 0
+saw medium 14 0
+saw small 15 0
+orb yellow 16 1
+orb pink 17 1
+orb red 18 1
+orb blue 19 1
+orb green 20 1
+orb black 21 1
+orb dash 22 1
+orb spider 23 1
+orb teleport 24 1
+orb toggle 25 1
+pad yellow 26 0
+pad pink 27 0
+pad red 28 0
+pad blue 29 0
+pad spider 30 0
+portal cube 31 2
+portal ship 32 2
+portal ball 33 2
+portal ufo 34 2
+portal wave 35 2
+portal robot 36 2
+portal spider 37 2
+portal swing 38 2
+portal gravDown 39 2
+portal gravUp 40 2
+portal mirrorOn 41 2
+portal mirrorOff 42 2
+portal mini 43 2
+portal sizeNormal 44 2
+portal speedHalf 45 2
+portal speed1x 46 2
+portal speed2x 47 2
+portal speed3x 48 2
+portal speed4x 49 2
+portal dualOn 50 2
+portal dualOff 51 2
+startpos 52 0
+coin 53 3
+obj 1329 54 3
+obj 914 0.5 -1.25 scale:0.25

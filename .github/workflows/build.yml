@@ -1,0 +1,194 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v*"
+  pull_request:
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Compiler core: pure C++ unit/integration tests (no Geode SDK involved).
+  # ---------------------------------------------------------------------------
+  core-tests:
+    name: Compiler core tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure (sandbox mode)
+        run: cmake -S . -B build-core -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DGDCODE_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build-core --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build-core --output-on-failure
+
+      - name: Compile the example scripts with the CLI
+        run: |
+          for f in examples/*.gdx; do
+            echo "== $f"
+            ./build-core/gdcode-cli "$f"
+          done
+
+  # ---------------------------------------------------------------------------
+  # The real mod, built with the Geode SDK for every supported platform.
+  # ---------------------------------------------------------------------------
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: Windows
+            os: windows-latest
+
+          - name: macOS
+            os: macos-latest
+
+          - name: iOS
+            os: macos-latest
+            target: iOS
+
+          - name: Android32
+            os: ubuntu-latest
+            target: Android32
+
+          - name: Android64
+            os: ubuntu-latest
+            target: Android64
+
+    name: Build ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build the mod
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          # Use exactly the Geode version declared in mod.json.
+          sdk: given
+          combine: true
+          target: ${{ matrix.config.target }}
+
+  # ---------------------------------------------------------------------------
+  # Merge the per-platform builds into one .geode, verify its structure and
+  # publish it as the downloadable artifact.
+  # ---------------------------------------------------------------------------
+  package:
+    name: Package .geode
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    permissions:
+      actions: write   # the combine action deletes the per-platform artifacts
+      contents: write  # package report is posted as a commit comment
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: source
+
+      - uses: geode-sdk/build-geode-mod/combine@main
+        id: build
+
+      - name: Check the package structure
+        run: bash source/.github/scripts/inspect-geode.sh "${{ steps.build.outputs.build-output }}" package-report.md
+
+      - name: Post the package report as a commit comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f package-report.md ]; then
+            gh api -X POST "repos/${{ github.repository }}/commits/${{ github.sha }}/comments" -F body=@package-report.md > /dev/null || echo "::warning::could not post the package report"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: GDCode (all platforms)
+          path: ${{ steps.build.outputs.build-output }}
+
+  # ---------------------------------------------------------------------------
+  # Pushing a v* tag builds the mod like any other run and afterwards turns
+  # the packaged artifact into a GitHub Release.
+  # ---------------------------------------------------------------------------
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: ["package"]
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: GDCode (all platforms)
+
+      - name: Create the release with the packaged mod
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          pkg="$(find . -name '*.geode' | head -1)"
+          if [ -z "$pkg" ]; then echo "::error::no .geode file in the artifact"; exit 1; fi
+          repo="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          tag="$GITHUB_REF_NAME"
+          cat > release-notes.md <<EOF
+          ## GDCode ${tag}
+
+          Write Geometry Dash levels as **code**: type (or paste) a script in the in-game editor,
+          press **Generate**, and a real, editable, playable level appears in *My Levels*.
+
+          ### Install
+          1. Requires **Geometry Dash 2.2081** with **Geode v5.10.1** or newer.
+          2. Download the attached **\`coderunknow.gdcode.geode\`** into your
+             \`<GD folder>/geode/mods/\` folder (or drag it onto the Geode mods window).
+          3. Restart the game and press the green \`</>\` button in the main menu.
+
+          ### This release
+          - GDCode language (level settings, objects, \`var\`, \`repeat\`, \`define\`, \`random\`).
+          - In-game code editor with live problems panel and click-to-jump diagnostics.
+          - Project storage in the mod save folder; regenerate a level in place with confirmation.
+          - Built for Windows, macOS, iOS and Android (32/64-bit) with zero compiler warnings.
+
+          ### Documentation
+          - Language reference: [\`docs/DSL.md\`](${repo}/blob/${tag}/docs/DSL.md)
+          - Building from source: [\`docs/BUILD.md\`](${repo}/blob/${tag}/docs/BUILD.md)
+          - Known limitations & in-game verification checklist:
+            [\`docs/LIMITATIONS.md\`](${repo}/blob/${tag}/docs/LIMITATIONS.md)
+
+          Initial release; please report anything that does not work via the issue tracker.
+          EOF
+          gh release create "$tag" --title "GDCode $tag" --notes-file release-notes.md "$pkg"
+          echo "Release $tag created with $(basename "$pkg") ($(stat -c%s "$pkg") bytes)"
+
+  # ---------------------------------------------------------------------------
+  # Mirror compiler diagnostics of every job into commit comments (readable via
+  # the GitHub API even where the log storage host is not reachable). Purely
+  # informational; never changes the outcome of the run.
+  # ---------------------------------------------------------------------------
+  report:
+    name: CI report
+    runs-on: ubuntu-latest
+    needs: ["core-tests", "build", "package"]
+    if: ${{ always() }}
+    permissions:
+      actions: read
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Post log excerpts as commit comments
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          SHA: ${{ github.sha }}
+        run: bash .github/scripts/ci-report.sh
