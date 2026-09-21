@@ -18,6 +18,15 @@
 
 ## Behaviour to be aware of
 
+- **Editor size cap:** scripts longer than 200k characters after line-ending
+  normalization cannot open in the in-game editor. They remain intact on disk;
+  use Folder/external editing or the CLI. Oversize Replace Paste is rejected too.
+- **Failed saves:** closing offers Keep editing or explicit Discard; use Copy to
+  rescue edits before discarding. The two project files are not an atomic pair.
+- **AI Prompt:** bundled offline and available from Projects/Help. Copy depends
+  on the platform clipboard; failure is reported without closing the reader.
+
+
 - **Level linking is by name + fingerprint.** If you rename the generated
   level in GD, GDCode cannot find it again and creates a new one. If you edit
   it in the editor (and save), the next *Generate* warns before overwriting.

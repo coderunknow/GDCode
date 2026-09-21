@@ -1,7 +1,11 @@
-# GDCode coding-agent master prompt — v0.2.0
+# GDCode coding-agent master prompt - v0.2.0
 
-Use this entire file as a standalone prompt for a coding agent. Verify it against
+Use this entire text as a standalone prompt for a coding agent. Verify it against
 current source before editing. Treat validation claims as evidence, not guarantees.
+In Geometry Dash, open AI Prompt from the GDCode project list or Help (?), read
+it here and press Copy Prompt to paste the entire text into your AI. This is a
+mod-development prompt, not a level-script-writing assistant. No network or
+external file is needed in-game; the canonical repository text is embedded by CMake.
 
 ## Your project
 
@@ -31,7 +35,13 @@ Android32/64. Do not guess signatures from a different Geode version.
   line index, bounded undo/redo snapshots. `CCIMEDelegate` receives text,
   keyboard delegate handles navigation/shortcuts, touch/mouse handle caret and
   scrolling. Enter/Tab dual-channel events are deduplicated. `onExit` blurs IME.
-- `src/ui/HelpPopup.*`: in-game reference, partly generated from the catalog.
+  `EditorText.hpp` normalizes CRLF/CR before the 200k character limit; oversize
+  load/replacement is rejected, never cropped. Replace Paste is one undoable edit.
+- `src/ui/HelpPopup.*`: wrapped in-game reference, partly generated from the catalog,
+  with an AI Prompt button. `AiPromptPopup.*` shows the full embedded prompt in a
+  scrollable read-only view and copies the same full text via the OS clipboard.
+  `src/content/AiCodingPrompt.hpp.in` is configured from this document at build
+  time; never hand-edit the generated header or add runtime document downloads.
 - `src/storage/ProjectStore.*`: singleton file repository, **not runtime state**.
   `Project = ProjectMeta + source`; metadata holds id/name/timestamps/object
   count and optional `LevelLink`. Files under `Mod::get()->getSaveDir()/projects/<id>/`:
@@ -59,7 +69,9 @@ source -> compile(CompileOptions) -> Lexer -> tokens -> Parser -> Program AST
   diagnostics, compile stats, default name and configurable `Limits`.
 - `Lexer`/`Token`: ASCII, newline-sensitive, numbers/strings/colors, `#` and `//`
   comments. `Parser` builds `Expr`, `Prop`, `Stmt`, `Program` (`Ast.hpp`), recovers
-  at line/block boundaries. Read argument-minus rules in `docs/DSL.md`.
+  at line/block boundaries. EOF is determined by position: embedded NUL bytes
+  must still advance the lexer (including in comments/strings). Read argument-minus
+  rules in `docs/DSL.md`.
 - `Lowering`: scopes, immutable `var`, repeat index variables, hoisted `define`
   patterns, expression evaluation and deterministic `random(lo,hi)`. Checks
   settings/properties, recursion/nesting/work/object/time budgets. Diagnostics,
@@ -136,6 +148,10 @@ source -> compile(CompileOptions) -> Lexer -> tokens -> Parser -> Program AST
   ownership is cocos retain/release, not `delete` on live children. Use `Ref`
   across callbacks/removal; use `WeakRef` for non-owning parent callbacks.
   Geode popups swallow input: close/remove, detach IME and cancel scheduled work.
+- Blur the code editor before Help or confirmation modals so Windows IME/shortcut
+  input cannot edit source behind the overlay. Confirmation callbacks use weak
+  ownership. A failed close-time save keeps the editor available and offers
+  explicit Keep editing/Discard, with Escape retaining the source.
 - UI uses `Popup`, `CCMenuItemExt`, `RowLayout`/anchors, `handleTouchPriority` after
   rebuilding lists. Backend errors log with `log::error/warn`; visible failures
   use alerts/notifications. Storage returns `geode::Result` and propagates errors.
@@ -172,7 +188,9 @@ parser, semantics, generation, encoding against a decoded GD fixture, diagnostic
 fuzz cases and four golden triplets. `test_navigation` compiles **production**
 `LevelNavigation.cpp` against a small API double: checks context, cleanup order,
 failure/Stay/duplicate entry, **not native pause or input dispatch**. CLI tests
-check source-context output and exit/quiet behavior. Follow the manual matrix in
+check source-context output and exit/quiet behavior. Editor text tests cover
+normalization/oversize rejection; prompt tests compare the embedded text byte-for-byte
+with the canonical source and check bitmap-font-safe ASCII. Follow the manual matrix in
 `docs/VALIDATION_v0.2.0.md`; never claim host tests prove in-game correctness.
 `tools/check_gd_api.py <objects.csv>` optionally checks catalog IDs against an
 external dataset. No dataset is downloaded automatically.

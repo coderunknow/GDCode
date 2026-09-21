@@ -12,6 +12,7 @@
 // Rendering is a window of CCLabelBMFont lines clipped with a scissor rect.
 
 #include <Geode/Geode.hpp>
+#include "EditorText.hpp"
 
 #include <functional>
 #include <optional>
@@ -25,7 +26,10 @@ public:
     static CodeEditor* create(cocos2d::CCSize const& size);
 
     std::string const& getText() const { return m_text; }
-    void setText(std::string const& text);
+    /// Load a buffer. Oversize input is rejected without changing existing text.
+    bool setText(std::string const& text);
+    /// Replace as one undoable user edit; reject oversize without changes.
+    bool replaceText(std::string const& text);
 
     /// Insert text at the caret (used by Paste).
     void insertAtCursor(std::string const& text);
@@ -150,7 +154,6 @@ private:
     cocos2d::CCLabelBMFont* m_measureLabel = nullptr;
     cocos2d::CCLabelBMFont* m_placeholder = nullptr;
 
-    static constexpr std::size_t kMaxEditorChars = 200'000;
     static constexpr std::size_t kMaxUndo = 200;
     static constexpr char const* kFont = "chatFont.fnt";
 };

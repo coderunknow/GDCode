@@ -68,8 +68,8 @@ and review the diff.
 
 ## v0.2.0 validation
 
-`ctest` includes the seven compiler suites plus navigation-contract and CLI
-integration tests. Native pause/exit must still be tested in GD; see
+`ctest` includes the seven compiler suites plus navigation-contract, CLI,
+editor-text and embedded-prompt tests (11 suites total). Native pause/exit must still be tested in GD; see
 [VALIDATION_v0.2.0.md](VALIDATION_v0.2.0.md). Host ASan/UBSan check:
 
 ```sh
@@ -81,3 +81,9 @@ ctest --test-dir build-sanitize --output-on-failure
 ```
 
 The non-PIE flags here are for Linux host sanitizer runs, not mod builds.
+
+The offline AI prompt is embedded by CMake from `docs/AI_CODING_PROMPT.md` using
+`src/content/AiCodingPrompt.hpp.in`. Editing the document triggers reconfiguration;
+no generated header belongs in Git. `test_prompt` checks full byte-for-byte parity
+and ASCII compatibility. The package job also checks that the complete prompt is
+present in all five binaries, not merely as a loose file in the archive.

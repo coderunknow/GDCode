@@ -27,6 +27,7 @@ portal ship 30 3
 ## Features
 
 - **In-game code editor** with line numbers, keyboard navigation, undo and clipboard import/export.
+- **AI coding prompt in-game**: open AI Prompt from the project list or Help, scroll to read and copy the full prompt to your AI. No external file or network needed.
 - **Live diagnostics** with line/column, "did you mean" suggestions - click a problem to jump to it.
 - **Deterministic generation**: the same script (and seed) always produces the same level.
 - **Projects** are plain text files in the mod's save folder - back them up or share them.

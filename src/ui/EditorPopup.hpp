@@ -27,7 +27,7 @@ protected:
     void keyDown(cocos2d::enumKeyCodes key, double timestamp) override;
 
 private:
-    void close(bool leaving, cocos2d::CCObject* sender = nullptr);
+    void close(bool leaving, cocos2d::CCObject* sender = nullptr, bool discard = false);
 
     // actions
     void onCheck(cocos2d::CCObject*);

@@ -133,3 +133,28 @@ TEST(empty_input_yields_only_end) {
     CHECK_EQ(toks.size(), std::size_t{1});
     CHECK(toks[0].is(Tok::End));
 }
+
+TEST(embedded_nul_is_not_eof_and_never_stalls) {
+    for (std::string prefix : {"", "# comment ", "// comment ", "\"text", "\"escape\\"}) {
+        std::string source = prefix + std::string(1, '\0');
+        if (prefix.starts_with('"')) source += '"';
+        source += "\nblock 2 3\n";
+        DiagnosticBag diags;
+        auto tokens = lexAll(source, diags);
+        CHECK(tokens.back().is(Tok::End));
+        CHECK_EQ(tokens.back().span.begin.line, std::size_t{3});
+        bool foundBlock = false;
+        for (auto const& token : tokens) if (token.text == "block") foundBlock = true;
+        CHECK(foundBlock);
+        if (!prefix.starts_with('#') && !prefix.starts_with('/')) CHECK(diags.hasErrors());
+    }
+}
+
+TEST(all_byte_values_make_forward_progress) {
+    std::string source;
+    for (int byte = 0; byte < 256; ++byte) source += static_cast<char>(byte);
+    DiagnosticBag diags;
+    auto tokens = lexAll(source, diags);
+    CHECK(tokens.back().is(Tok::End));
+    CHECK(diags.hasErrors());
+}

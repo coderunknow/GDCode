@@ -152,8 +152,8 @@ jobs:
 
           ### This release
           - Correct native local-level return context and GDCode popup cleanup on scene handoff.
-          - Standalone AI coding-agent onboarding prompt in docs/AI_CODING_PROMPT.md.
-          - CLI diagnostics with source excerpts and carets; existing compiler output preserved.
+          - Offline in-game AI Prompt reader and Copy button from Projects and Help.
+          - CLI diagnostics with source excerpts; fixes for NUL hangs, oversized source loss and editor modal/save handling.
           - Built for Windows, macOS, iOS and Android (32/64-bit); see CI for build diagnostics.
 
           ### Documentation

@@ -15,7 +15,8 @@ char Lexer::peek(std::size_t ahead) const {
 
 char Lexer::advance() {
     char c = peek();
-    if (c != '\0') ++m_offset;
+    // EOF is a position, not a byte value: embedded NUL must still advance.
+    if (!atEnd()) ++m_offset;
     return c;
 }
 
@@ -153,6 +154,8 @@ Token Lexer::next() {
     std::string msg;
     if (static_cast<unsigned char>(c) >= 0x80) {
         msg = "non-ASCII character in code (GD's fonts cannot render it; use ASCII)";
+    } else if (c == '\0') {
+        msg = "unexpected NUL byte in code";
     } else {
         msg = "unexpected character '";
         msg += c;

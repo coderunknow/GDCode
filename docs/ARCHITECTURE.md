@@ -97,7 +97,13 @@ Plain files so users can back up, share and edit them externally.
   New Level, Copy, Paste, Undo, Help). Autosaves 1.5 s after changes and on
   close; recompiles 0.45 s after changes.
 - `ProjectsPopup` - project list, New / Import clipboard / Folder / delete.
-- `HelpPopup` - language reference generated from the object catalog.
+- `HelpPopup` - wrapped language reference generated from the object catalog.
+- `AiPromptPopup` - scrollable offline coding-agent prompt plus Copy Prompt;
+  opened from Projects or Help. CMake embeds the canonical prompt into a generated
+  header, so the installed mod never needs to read a repository file.
+- `EditorText.hpp` - shared, host-testable line-ending normalization and 200k
+  limit check. Oversized loads/pastes are rejected, not truncated. Replacing
+  pasted text uses the existing undo machinery.
 
 ## Testing strategy
 

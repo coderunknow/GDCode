@@ -63,6 +63,12 @@ Exit generated content using GD's native pause menu (Resume / Save and Exit / Qu
 as appropriate). Return through the local level screens to the main menu, then
 reopen **`</>`** to continue your saved script.
 
+Press **AI Prompt** in the project list, or **? -> AI Prompt** in the editor,
+for a scrollable AI coding-agent prompt. **Copy Prompt** copies the full text to
+your Windows/system clipboard for pasting into an AI conversation. It works
+offline, is bundled inside the mod, and requires no Markdown file. This prompt
+is for developing the GDCode mod (not generating level scripts).
+
 Press **?** in the editor for the built-in reference. Full syntax: [docs/DSL.md](docs/DSL.md).
 
 Settings (Geode mod settings): *After generating a level* (`editor` / `level-page` / `stay`),
@@ -118,8 +124,8 @@ error[unknown-object]: line 1, column 1: unknown object type 'spirke'
       | ^
 ```
 
-For a copy-paste coding-agent onboarding prompt, use
-[docs/AI_CODING_PROMPT.md](docs/AI_CODING_PROMPT.md).
+The canonical source for the in-game prompt remains
+[docs/AI_CODING_PROMPT.md](docs/AI_CODING_PROMPT.md); CMake embeds it in the mod.
 
 ## How the level is produced
 

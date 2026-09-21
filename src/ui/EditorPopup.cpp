@@ -62,7 +62,7 @@ bool EditorPopup::init(storage::Project project) {
     m_editor = CodeEditor::create({kEditorW, kEditorH});
     m_mainLayer->addChildAtPosition(m_editor, Anchor::TopLeft,
                                     {kMargin + kEditorW / 2, -(kTopOffset + kEditorH / 2)});
-    m_editor->setText(m_project.source);
+    if (!m_editor->setText(m_project.source)) return false;
     m_editor->setOnChange([this] {
         m_dirty = true;
         updateStatus();
@@ -148,12 +148,23 @@ void EditorPopup::onClose(CCObject* sender) {
     close(false, sender);
 }
 
-void EditorPopup::close(bool leaving, CCObject* sender) {
+void EditorPopup::close(bool leaving, CCObject* sender, bool discard) {
     Ref<EditorPopup> keepAlive = this;
+    if (!discard && m_dirty && !saveProject(false)) {
+        m_editor->blur();
+        createQuickPopup(
+            "Project not saved",
+            "Your changes are still in the editor. Keep editing to copy them or retry saving. "
+            "<cr>Discard</c> closes without retrying the save.",
+            "Keep editing", "Discard",
+            [self = WeakRef<EditorPopup>(this)](FLAlertLayer*, bool confirmed) {
+                if (auto editor = self.lock(); editor && confirmed) editor->close(false, nullptr, true);
+            }, true, true);
+        return;
+    }
     if (m_editor) m_editor->blur();
     this->unschedule(schedule_selector(EditorPopup::runAutosave));
     this->unschedule(schedule_selector(EditorPopup::runLiveCheck));
-    if (m_dirty) saveProject(false);
     auto onClosed = std::move(m_onClosed);
     Popup::onClose(sender);
     if (onClosed) onClosed(leaving);
@@ -348,22 +359,18 @@ void EditorPopup::onPaste(CCObject*) {
         m_editor->insertAtCursor(clip);
         return;
     }
+    m_editor->blur();
     createQuickPopup(
         "Paste",
         fmt::format("Clipboard holds <cy>{}</c> characters.\nInsert at the cursor, or replace the whole script?",
                     clip.size()),
         "Insert", "Replace",
-        [this, clip](FLAlertLayer*, bool replace) {
-            if (replace) {
-                m_editor->setText(clip);
-                m_dirty = true;
-                scheduleLiveCheck();
-                scheduleAutosave();
-                updateStatus();
-            } else {
-                m_editor->insertAtCursor(clip);
+        [self = WeakRef<EditorPopup>(this), clip](FLAlertLayer*, bool replace) {
+            if (auto editor = self.lock()) {
+                if (replace) editor->m_editor->replaceText(clip);
+                else editor->m_editor->insertAtCursor(clip);
             }
-        });
+        }, true, true);
 }
 
 void EditorPopup::onUndo(CCObject*) {
@@ -371,7 +378,8 @@ void EditorPopup::onUndo(CCObject*) {
 }
 
 void EditorPopup::onHelp(CCObject*) {
-    HelpPopup::create()->show();
+    m_editor->blur();
+    if (auto* popup = HelpPopup::create()) popup->show();
 }
 
 // ---------------------------------------------------------------------------
@@ -380,6 +388,7 @@ void EditorPopup::onHelp(CCObject*) {
 
 void EditorPopup::onGenerate(bool forceNewLevel) {
     if (m_generating) return;
+    m_editor->blur();
     auto result = compileCurrent();
     m_lastErrorCount = result.diagnostics.errorCount();
     m_lastObjectCount = result.stats.objectCount;
@@ -440,9 +449,9 @@ void EditorPopup::onGenerate(bool forceNewLevel) {
                         "Use <cg>New Level</c> instead to keep it.",
                         existingName),
             "Cancel", "Overwrite",
-            [this, ir, target](FLAlertLayer*, bool overwrite) {
-                if (overwrite) writeAndOpen(*ir, target);
-            });
+            [self = WeakRef<EditorPopup>(this), ir, target](FLAlertLayer*, bool overwrite) {
+                if (auto editor = self.lock(); editor && overwrite) editor->writeAndOpen(*ir, target);
+            }, true, true);
         return;
     }
     if (Mod::get()->getSettingValue<bool>("confirm-overwrite")) {
@@ -450,9 +459,9 @@ void EditorPopup::onGenerate(bool forceNewLevel) {
             "Update level",
             fmt::format("Regenerate <cy>{}</c> in place?\n({} objects)", existingName, ir->objects.size()),
             "Cancel", "Update",
-            [this, ir, target](FLAlertLayer*, bool update) {
-                if (update) writeAndOpen(*ir, target);
-            });
+            [self = WeakRef<EditorPopup>(this), ir, target](FLAlertLayer*, bool update) {
+                if (auto editor = self.lock(); editor && update) editor->writeAndOpen(*ir, target);
+            }, true, true);
         return;
     }
     writeAndOpen(*ir, target);

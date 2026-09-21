@@ -103,3 +103,66 @@ other enabled mods, result and logs for failures. First test without other mods.
 Second-pass onboarding review: prompt identifies entry/init, compiler/generation,
 Run/native Pause/Exit, syntax/UI extension files, build/tests and test limitations.
 Another agent needs no prior conversation; source inspection remains mandatory.
+
+
+## Follow-up: in-game AI prompt and bug review
+
+Requested behavior: Read + Copy, entry points in Projects and Help, Windows first.
+The original pause fix has **not** been tested in-game by the user yet.
+
+### Implementation and reproduced findings
+
+- `AiPromptPopup`: scrollable read-only window with Copy Prompt. CMake embeds the
+  canonical document in the binary; there is no runtime file/network dependency.
+  Clipboard copies the original complete text, not wrapped/visible lines. Both
+  entry points share the same popup; native popup close handles Escape/X.
+- **Confirmed lexer hang:** at `927fe08`, `timeout 2 gdcode-cli` on
+  `b"# comment\x00\nblock 0 0\n"` returned 124. `advance()` treated byte zero as
+  EOF even though `atEnd()` was false. Advance now uses the position; that same
+  input completes with one object and zero errors. NUL in code/strings produces
+  a diagnostic; NUL in a comment is ignored. Tests cover both comment styles,
+  strings/escapes, every byte value and fuzz inputs with NUL. Lexer suite timeout
+  prevents this regression from hanging CI.
+- **Source-loss path found by code tracing:** `setText` resized a loaded/replacement
+  buffer to 200k; saving could overwrite the original longer source. Shared
+  `prepareEditorText` now rejects overflow after CRLF/CR normalization, before
+  touching editor state. Opening an oversized project aborts with a notification;
+  the original source file stays intact. Boundary/CRLF tests pass.
+- **Replace Paste discarded Undo:** previously used initial-load `setText`, which
+  cleared history. Now uses the existing edit/snapshot/change-callback path.
+- **Escape in Paste inserted text:** QuickPopup reported false (same as Insert).
+  Set cancelledByEscape so Escape is a true cancellation.
+- **Failed close-time save dropped edits:** code unconditionally closed after save
+  failure. It now keeps the editor, offering Keep editing or explicit Discard,
+  without calling the parent-close callback prematurely.
+- **Modal input/lifetime review:** blur IME before Help/Paste/Generate confirmations;
+  weak captures avoid accessing an editor destroyed while a confirmation is open.
+  Help text now wraps instead of clipping long lines with no horizontal scrolling.
+
+### Follow-up evidence
+
+- GCC 12 Debug: **11/11** suites pass. **ASan + UBSan: 11/11** pass with no reports.
+- New tests: `test_editor_text` (normalization and rejection), `test_prompt`
+  (entire embedded content equals canonical text, font-safe ASCII), lexer NUL/
+  byte-progress cases. Existing compiler golden files remain unchanged.
+- Package inspection now requires the full prompt in each of the five binaries.
+- Real platform build/package result: pending follow-up CI. Earlier build evidence
+  above predates these UI changes and must not be used as proof of this revision.
+- Host tests do not exercise actual window layout, clipboard integration, save
+  dialogs or Undo in cocos. Those Windows-first acceptance checks remain below.
+
+### Additional Windows acceptance checks - NOT RUN
+
+1. Project list -> AI Prompt: read from first to final instruction, scroll with
+   wheel/drag, Copy Prompt then paste into Notepad; compare complete beginning/end.
+2. Editor -> Help -> AI Prompt: read/copy, Escape or X back to Help, then back to
+   editor. Repeat ten times. No stale overlays; source remains unchanged when
+   typing/pressing Ctrl+V behind either modal. Click editor to resume typing.
+3. Exercise clipboard failure where practical: reader stays open, error visible.
+4. Load >200k characters from a backed-up project: cannot open, file unchanged.
+   Paste/Replace >200k: old buffer and Undo history unchanged; CRLF at limit works.
+5. Replace a short script, Undo, Redo: recover exact source. Escape Paste: no edit.
+6. Make project directory read-only, edit then close: Keep editing/Escape retains
+   source; restore permissions and retry saves; explicit Discard returns safely.
+   Back up the project first. Verify parent list callbacks run only on actual close.
+7. Re-run the native pause/resume/exit/re-entry matrix above. No new pause hooks.

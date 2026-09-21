@@ -49,7 +49,7 @@ TEST(garbage_input_never_crashes) {
     // some noise. Every input must compile (with errors) without crashing or
     // hanging, and never produce a non-ASCII level string.
     char const alphabet[] =
-        "abcdefghijklmnopqrstuvwxyz0123456789 \n\t(){},:=+-*/#\"\\._;|!@%^&[]<>?~`'\xff\x80";
+        "abcdefghijklmnopqrstuvwxyz0123456789 \n\t(){},:=+-*/#\"\\._;|!@%^&[]<>?~`'\xff\x80\0";
     std::uint64_t state = 0x12345678ULL;
     auto next = [&]() {
         state ^= state << 13;
