@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 
 using namespace geode::prelude;
 
@@ -13,10 +14,6 @@ double nowSeconds() {
     using namespace std::chrono;
     return duration_cast<duration<double>>(steady_clock::now().time_since_epoch()).count();
 }
-
-/// Keys whose press can reach us twice: once through CCKeyboardDelegate and
-/// once through the IME (platform dependent). See keyDown()/insertText().
-enum class DedupKey { Enter = 0, Tab, Backspace, Delete, Count };
 
 } // namespace
 
@@ -553,7 +550,7 @@ void CodeEditor::deleteForward() {
 // keyboard (navigation + shortcuts)
 // ---------------------------------------------------------------------------
 
-void CodeEditor::keyDown(enumKeyCodes key, double timestamp) {
+void CodeEditor::keyDown(enumKeyCodes key, double) {
     if (!m_focused) return;
     auto* kb = CCKeyboardDispatcher::get();
     bool ctrl = kb->getControlKeyPressed() || kb->getCommandKeyPressed();
@@ -620,7 +617,6 @@ void CodeEditor::keyDown(enumKeyCodes key, double timestamp) {
         default:
             return;
     }
-    (void)timestamp;
 }
 
 void CodeEditor::scrollWheel(float y, float) {

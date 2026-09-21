@@ -88,18 +88,17 @@ bool EditorPopup::init(storage::Project project) {
     m_problems->setTouchEnabled(true);
     problemsBg->addChildAtPosition(m_problems, Anchor::BottomLeft, {4.f, 4.f});
 
-    // --- status line --------------------------------------------------------
+    // --- status line (between the editor and the buttons) ------------------
     m_status = CCLabelBMFont::create("", "chatFont.fnt");
     m_status->setScale(0.55f);
     m_status->setAnchorPoint({0.f, 0.5f});
-    m_mainLayer->addChildAtPosition(m_status, Anchor::TopLeft, {kMargin, -(kTopOffset - 10.f)});
+    m_mainLayer->addChildAtPosition(m_status, Anchor::BottomLeft, {kMargin, 54.f});
 
     m_position = CCLabelBMFont::create("", "chatFont.fnt");
     m_position->setScale(0.55f);
     m_position->setAnchorPoint({1.f, 0.5f});
     m_position->setOpacity(160);
-    m_mainLayer->addChildAtPosition(m_position, Anchor::TopLeft,
-                                    {kMargin + kEditorW, -(kTopOffset - 10.f)});
+    m_mainLayer->addChildAtPosition(m_position, Anchor::BottomLeft, {kMargin + kEditorW, 54.f});
 
     // --- buttons ------------------------------------------------------------
     auto* row = CCMenu::create();
