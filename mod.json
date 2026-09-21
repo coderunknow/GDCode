@@ -1,0 +1,49 @@
+{
+	"geode": "5.10.1",
+	"gd": {
+		"win": "2.2081",
+		"android": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
+	},
+	"id": "coderunknow.gdcode",
+	"name": "GDCode",
+	"version": "v0.1.0",
+	"developer": "coderunknow",
+	"description": "Write levels as code: a small level-scripting language compiled into real, editable Geometry Dash levels.",
+	"tags": ["editor", "utility", "content"],
+	"links": {
+		"source": "https://github.com/coderunknow/Test-geode-mod"
+	},
+	"dependencies": {
+		"geode.node-ids": ">=v1.23.3"
+	},
+	"settings": {
+		"after-generate": {
+			"type": "string",
+			"name": "After generating a level",
+			"description": "What to do once a level has been generated. <cy>editor</c>: open it in the level editor right away. <cy>level-page</c>: open its level page (Edit / Play buttons). <cy>stay</c>: stay in the GDCode window.",
+			"default": "editor",
+			"one-of": ["editor", "level-page", "stay"]
+		},
+		"confirm-overwrite": {
+			"type": "bool",
+			"name": "Confirm before regenerating",
+			"description": "Ask before an existing generated level is replaced by a new generation of the same project.",
+			"default": true
+		},
+		"max-objects": {
+			"type": "int",
+			"name": "Object limit",
+			"description": "Safety cap on the number of objects one script may generate.",
+			"default": 100000,
+			"min": 1000,
+			"max": 500000,
+			"control": {
+				"slider": false,
+				"arrows": false,
+				"input": true
+			}
+		}
+	}
+}

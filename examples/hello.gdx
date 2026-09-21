@@ -1,0 +1,47 @@
+# GDCode example: a small, playable cube level.
+#
+# Coordinates are in blocks: x grows to the right, y grows upward,
+# y = 0 is the row that sits on the ground.
+
+level "Hello GDCode" {
+    desc: "Generated with GDCode"
+    song: 0             # built-in soundtrack index (0 = Stereo Madness)
+    speed: normal       # slow | normal | fast | faster | fastest
+    mode: cube          # cube | ship | ball | ufo | wave | robot | spider | swing
+    bg: #287DC8
+    ground: #0F5FA8
+    seed: 42            # makes random() reproducible
+}
+
+# --- a floor of 60 blocks -----------------------------------------------
+repeat 60 as i {
+    block i 0
+}
+
+# --- a few hazards ------------------------------------------------------
+spike 8 1
+spike 9 1
+spike half 14 1
+saw medium 26 3 rot:45
+
+# --- reusable pattern: a tower of blocks --------------------------------
+define tower(x, height) {
+    repeat height as j {
+        block x j + 1
+    }
+}
+
+tower(18, 2)
+tower(24, 3)
+tower(30, 1)
+
+# --- interactive objects ------------------------------------------------
+orb yellow 21 4
+pad pink 33 1
+portal ship 38 3
+
+# --- some randomness (deterministic thanks to seed) ---------------------
+repeat 6 as k {
+    var x = 42 + k * 3
+    spike x random(1, 2)
+}
