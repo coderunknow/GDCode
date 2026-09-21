@@ -10,6 +10,8 @@ namespace gdcode {
 
 struct CompileOptions {
     Limits limits;
+    /// Level name used when the script has no `level "..."` block.
+    std::string defaultLevelName = "Untitled";
 };
 
 struct CompileStats {

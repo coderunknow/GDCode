@@ -157,4 +157,63 @@ std::string encodeLevelString(LevelIR const& ir) {
     return out;
 }
 
+namespace {
+
+// Player travel speed in level units per second for each speed setting
+// (the constants the game itself uses; also used by community tools such as
+// BetterInfo for length estimation).
+double unitsPerSecondForSpeed(int kA4Speed) {
+    switch (kA4Speed) {
+        case 1: return 251.16008;  // slow  (0.5x)
+        case 2: return 387.42014;  // fast  (2x)
+        case 3: return 468.00015;  // faster (3x)
+        case 4: return 576.00018;  // fastest (4x)
+        default: return 311.58011; // normal (1x)
+    }
+}
+
+int speedForPortalId(int id) {
+    switch (id) {
+        case 200: return 1;
+        case 201: return 0;
+        case 202: return 2;
+        case 203: return 3;
+        case 1334: return 4;
+        default: return -1;
+    }
+}
+
+} // namespace
+
+double estimateLevelSeconds(LevelIR const& ir) {
+    double maxX = 0.0;
+    std::vector<std::pair<double, int>> portals; // (x, speed)
+    for (auto const& o : ir.objects) {
+        if (o.x > maxX) maxX = o.x;
+        int speed = speedForPortalId(o.id);
+        if (speed >= 0 && o.specialChecked) portals.emplace_back(o.x, speed);
+    }
+    std::sort(portals.begin(), portals.end());
+
+    double seconds = 0.0;
+    double prevX = 0.0;
+    int speed = ir.settings.speed;
+    for (auto const& [x, portalSpeed] : portals) {
+        if (x > prevX) seconds += (x - prevX) / unitsPerSecondForSpeed(speed);
+        prevX = std::max(prevX, x);
+        speed = portalSpeed;
+    }
+    if (maxX > prevX) seconds += (maxX - prevX) / unitsPerSecondForSpeed(speed);
+    return seconds;
+}
+
+int levelLengthKey(double seconds, bool platformer) {
+    if (platformer) return 5;
+    if (seconds < 10) return 0;
+    if (seconds < 30) return 1;
+    if (seconds < 60) return 2;
+    if (seconds < 120) return 3;
+    return 4;
+}
+
 } // namespace gdcode

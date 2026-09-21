@@ -36,7 +36,7 @@ CompileResult compile(std::string const& source, CompileOptions const& options) 
     Parser parser(std::move(tokens), result.diagnostics);
     Program program = parser.parse();
 
-    Lowering lowering(program, result.diagnostics, limits);
+    Lowering lowering(program, result.diagnostics, limits, options.defaultLevelName);
     result.ir = lowering.run();
     result.diagnostics.sortByPosition();
 

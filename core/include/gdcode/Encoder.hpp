@@ -22,4 +22,16 @@ std::string formatGdNumber(double value);
 /// the exact byte format GD stores in GJGameLevel::m_levelString.
 std::string encodeLevelString(LevelIR const& ir);
 
+/// Estimated play time of the level in seconds, computed the way the game's
+/// "length" classification does: distance to the right-most object divided
+/// by the player speed, honouring speed portals (ids 200/201/202/203/1334)
+/// along the way. Speeds are the game's unit-per-second constants for the
+/// five speed portals (0.5x .. 4x).
+double estimateLevelSeconds(LevelIR const& ir);
+
+/// GD length category derived from the play time (matches
+/// GJGameLevel::getLengthKey): 0 tiny, 1 short, 2 medium, 3 long, 4 XL,
+/// 5 platformer.
+int levelLengthKey(double seconds, bool platformer);
+
 } // namespace gdcode

@@ -180,3 +180,27 @@ TEST(level_string_is_pure_ascii_and_has_no_newlines) {
         CHECK(c >= 0x20 && c < 0x7F);
     }
 }
+
+TEST(level_length_estimate_uses_speed_and_portals) {
+    // 3115.8 units at normal speed (311.58/s) is 10 s -> "short" (key 1)
+    auto r = compile("block 103 0\n"); // x = 103*30+15 = 3105 -> just under 10s
+    CHECK(r.ok());
+    double s = estimateLevelSeconds(r.ir);
+    CHECK(s > 9.9 && s < 10.0);
+    CHECK_EQ(levelLengthKey(s, false), 0);
+    CHECK_EQ(levelLengthKey(s, true), 5);
+
+    // fastest from the start: 4x speed -> much shorter time
+    auto f = compile("level \"F\" { speed: fastest }\nblock 103 0\n");
+    CHECK(estimateLevelSeconds(f.ir) < 6.0);
+
+    // a slow portal at x=0 slows everything after it down
+    auto p = compile("portal speedHalf 0 0\nblock 103 0\n");
+    CHECK(estimateLevelSeconds(p.ir) > 12.0);
+
+    CHECK_EQ(levelLengthKey(29.9, false), 1);
+    CHECK_EQ(levelLengthKey(59.9, false), 2);
+    CHECK_EQ(levelLengthKey(119.9, false), 3);
+    CHECK_EQ(levelLengthKey(120.0, false), 4);
+    CHECK_EQ(estimateLevelSeconds(compile("").ir), 0.0);
+}

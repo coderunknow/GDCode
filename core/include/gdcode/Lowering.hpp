@@ -31,7 +31,8 @@ struct LoweringStats {
 /// hit it stops expanding (abortedByLimit) but keeps the IR produced so far.
 class Lowering {
 public:
-    Lowering(Program const& program, DiagnosticBag& diags, Limits limits);
+    Lowering(Program const& program, DiagnosticBag& diags, Limits limits,
+             std::string defaultLevelName = "Untitled");
 
     LevelIR run();
     LoweringStats const& stats() const { return m_stats; }

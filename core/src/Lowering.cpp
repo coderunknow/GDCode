@@ -57,8 +57,11 @@ std::vector<std::string> suggestAmong(std::string_view typo,
 
 } // namespace
 
-Lowering::Lowering(Program const& program, DiagnosticBag& diags, Limits limits)
-    : m_program(program), m_diags(diags), m_limits(std::move(limits)) {}
+Lowering::Lowering(Program const& program, DiagnosticBag& diags, Limits limits,
+                   std::string defaultLevelName)
+    : m_program(program), m_diags(diags), m_limits(std::move(limits)) {
+    m_ir.settings.name = defaultLevelName.empty() ? "Untitled" : std::move(defaultLevelName);
+}
 
 LevelIR Lowering::run() {
     m_deadline = std::chrono::steady_clock::now() +

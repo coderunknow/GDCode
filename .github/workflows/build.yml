@@ -1,0 +1,88 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Compiler core: pure C++ unit/integration tests (no Geode SDK involved).
+  # ---------------------------------------------------------------------------
+  core-tests:
+    name: Compiler core tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure (sandbox mode)
+        run: cmake -S . -B build-core -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DGDCODE_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build-core --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build-core --output-on-failure
+
+      - name: Compile the example scripts with the CLI
+        run: |
+          for f in examples/*.gdx; do
+            echo "== $f"
+            ./build-core/gdcode-cli "$f"
+          done
+
+  # ---------------------------------------------------------------------------
+  # The real mod, built with the Geode SDK for every supported platform.
+  # ---------------------------------------------------------------------------
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: Windows
+            os: windows-latest
+
+          - name: macOS
+            os: macos-latest
+
+          - name: iOS
+            os: macos-latest
+            target: iOS
+
+          - name: Android32
+            os: ubuntu-latest
+            target: Android32
+
+          - name: Android64
+            os: ubuntu-latest
+            target: Android64
+
+    name: Build ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build the mod
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          # Use exactly the Geode version declared in mod.json.
+          sdk: given
+          combine: true
+          target: ${{ matrix.config.target }}
+
+  package:
+    name: Package .geode
+    runs-on: ubuntu-latest
+    needs: ["build"]
+
+    steps:
+      - uses: geode-sdk/build-geode-mod/combine@main
+        id: build
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: GDCode (all platforms)
+          path: ${{ steps.build.outputs.build-output }}

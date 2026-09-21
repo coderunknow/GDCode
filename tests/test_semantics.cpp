@@ -237,3 +237,11 @@ TEST(identical_diagnostics_inside_loops_are_reported_once) {
     auto r = compile("repeat 50 { block 0 0 flipX:maybe }\n");
     CHECK_EQ(r.diagnostics.errorCount(), std::size_t{1});
 }
+
+TEST(default_level_name_option) {
+    CompileOptions opts;
+    opts.defaultLevelName = "Project X";
+    CHECK_EQ(compile("block 0 0\n", opts).ir.settings.name, std::string("Project X"));
+    CHECK_EQ(compile("level \"Named\" { }\n", opts).ir.settings.name, std::string("Named"));
+    CHECK_EQ(compile("block 0 0\n").ir.settings.name, std::string("Untitled"));
+}
