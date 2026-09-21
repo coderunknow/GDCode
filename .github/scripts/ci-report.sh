@@ -18,8 +18,9 @@ readonly MAX_DIAG=42000
 readonly MAX_WARN=8000
 readonly MAX_TAIL=8000
 
+# Drop the per-line timestamps and any ANSI colour/escape sequences.
 strip_timestamps() {
-    sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z ?//' "$1"
+    sed -E -e 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z ?//' -e 's/\x1b\[[0-9;?]*[ -\/]*[@-~]//g' "$1"
 }
 
 # Every job of this run attempt except the reporting job itself.
@@ -45,7 +46,7 @@ while IFS=$'\t' read -r job_id conclusion job_name; do
         echo
     } > "$body"
 
-    if ! gh api "repos/$REPO/actions/jobs/$job_id/logs" > "$log" 2> "$log.err"; then
+    if ! gh api --allow-escape-sequences "repos/$REPO/actions/jobs/$job_id/logs" > "$log" 2> "$log.err"; then
         {
             echo "_Could not download the job log:_"
             echo '```'
