@@ -164,7 +164,21 @@ jobs:
 
           Initial release; please report anything that does not work via the issue tracker.
           EOF
-          gh release create "$tag" --title "GDCode $tag" --notes-file release-notes.md "$pkg"
+          out="$(gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "GDCode $tag" --notes-file release-notes.md "$pkg" 2>&1)" && status=0 || status=$?
+          echo "$out"
+          if [ "$status" -ne 0 ]; then
+            # The raw log lives on a storage host some environments cannot reach;
+            # make the failure readable through the API as a commit comment.
+            {
+              echo "### Release job for $tag failed"
+              echo
+              echo '```text'
+              echo "$out"
+              echo '```'
+            } > release-failure.md
+            gh api -X POST "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments" -F body=@release-failure.md > /dev/null || true
+            exit 1
+          fi
           echo "Release $tag created with $(basename "$pkg") ($(stat -c%s "$pkg") bytes)"
 
   # ---------------------------------------------------------------------------
@@ -175,7 +189,9 @@ jobs:
   report:
     name: CI report
     runs-on: ubuntu-latest
-    needs: ["core-tests", "build", "package"]
+    # include "release" so that a failed release job also gets a detail comment
+    # (on non-tag runs "release" is skipped, which `always()` tolerates)
+    needs: ["core-tests", "build", "package", "release"]
     if: ${{ always() }}
     permissions:
       actions: read
