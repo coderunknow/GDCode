@@ -33,12 +33,13 @@ structure (`.github/scripts/inspect-geode.sh`: `mod.json`, one binary per
 platform, resources) and uploads it as the artifact **GDCode (all
 platforms)**. It also runs the compiler test-suite on Ubuntu.
 
-A final `CI report` job mirrors each job's compiler diagnostics (errors with
-context, warnings, the tail of failed logs) and the package listing into
-**commit comments** on the built commit (`.github/scripts/ci-report.sh`). This
-exists because GitHub serves raw logs and artifacts from a storage host that
-is not reachable from every environment, while the API is; the job is purely
-informational and can be removed without affecting the build.
+A final `CI report` job posts one summary **commit comment** per run (job
+conclusions and compiler warnings) plus one detail comment per failed job
+(errors with context, log tail); the package job posts the `.geode` listing
+the same way (`.github/scripts/ci-report.sh`). This exists because GitHub
+serves raw logs and artifacts from a storage host that is not reachable from
+every environment, while the API is; the job is purely informational and can
+be removed without affecting the build.
 
 ## Compiler core, tests and CLI (no game needed)
 
