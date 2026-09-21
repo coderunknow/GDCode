@@ -20,7 +20,7 @@ set -uo pipefail
 readonly MAX_DIAG=42000
 readonly MAX_WARN=6000
 readonly MAX_TAIL=8000
-readonly WARNING_RE='(^|[^a-zA-Z])warning( [A-Z]+[0-9]+)?:'
+readonly WARNING_RE='(^|[^a-zA-Z:])warning( [A-Z]+[0-9]+)?:'
 
 # Drop the per-line timestamps and any ANSI colour/escape sequences.
 clean_log() {
