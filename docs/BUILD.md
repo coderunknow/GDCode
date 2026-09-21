@@ -28,9 +28,17 @@ the CLI. Root `CMakeLists.txt` detects `GEODE_SDK` and switches into mod mode.
 
 `.github/workflows/build.yml` builds the mod for Windows, macOS, iOS,
 Android32 and Android64 with `geode-sdk/build-geode-mod` (SDK version taken
-from `mod.json`), combines them into one `.geode` and uploads it as the
-artifact **GDCode (all platforms)**. It also runs the compiler test-suite on
-Ubuntu.
+from `mod.json`), combines them into one `.geode`, verifies the package
+structure (`.github/scripts/inspect-geode.sh`: `mod.json`, one binary per
+platform, resources) and uploads it as the artifact **GDCode (all
+platforms)**. It also runs the compiler test-suite on Ubuntu.
+
+A final `CI report` job mirrors each job's compiler diagnostics (errors with
+context, warnings, the tail of failed logs) and the package listing into
+**commit comments** on the built commit (`.github/scripts/ci-report.sh`). This
+exists because GitHub serves raw logs and artifacts from a storage host that
+is not reachable from every environment, while the API is; the job is purely
+informational and can be removed without affecting the build.
 
 ## Compiler core, tests and CLI (no game needed)
 

@@ -34,6 +34,16 @@
   if a description ever shows up garbled, that assumption is the first thing
   to check.
 
+## Verification status
+
+- The compiler core is covered by automated tests (lexer, parser, semantics,
+  generation, encoder, diagnostics, golden snapshots) that run in CI.
+- The mod compiles and links for Windows, macOS, iOS, Android32 and Android64
+  in CI against Geode v5.10.1 / GD 2.2081, and the combined `.geode` package
+  is structurally checked (see `docs/BUILD.md`).
+- The **in-game behaviour has not been verified by the author yet**; the
+  checklist below is what a release should be validated against.
+
 ## In-game verification checklist
 
 Automated tests cover the compiler completely; the game-facing layer has to

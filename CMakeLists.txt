@@ -26,23 +26,29 @@ if (DEFINED ENV{GEODE_SDK})
     set(GDCODE_MOD_MODE ON)
 endif()
 
-# Compiler core: pure C++, zero Geode / GD dependencies.
-add_subdirectory(core)
-
 if (GDCODE_MOD_MODE)
     message(STATUS "GDCode: Geode SDK found at $ENV{GEODE_SDK} -- building the mod")
 
     file(GLOB_RECURSE MOD_SOURCES CONFIGURE_DEPENDS src/*.cpp)
     add_library(${PROJECT_NAME} SHARED ${MOD_SOURCES})
+
+    add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
+
+    # The compiler core (pure C++, zero Geode / GD dependencies) is added after
+    # the SDK on purpose: the SDK sets platform settings in this scope (e.g. the
+    # iOS deployment target) that the core's objects must be built with too.
+    add_subdirectory(core)
     # Plain (keyword-less) signature on purpose: setup_geode_mod() links
     # geode-sdk with the plain signature and CMake forbids mixing the two forms
     # on one target.
     target_link_libraries(${PROJECT_NAME} gdcode_core)
 
-    add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
     setup_geode_mod(${PROJECT_NAME})
 else()
     message(STATUS "GDCode: GEODE_SDK not set -- sandbox mode (core + tests + cli)")
+
+    # Compiler core: pure C++, zero Geode / GD dependencies.
+    add_subdirectory(core)
 
     option(GDCODE_BUILD_TESTS "Build the compiler core test-suite" ON)
     if (GDCODE_BUILD_TESTS)
