@@ -146,8 +146,13 @@ The original pause fix has **not** been tested in-game by the user yet.
   (entire embedded content equals canonical text, font-safe ASCII), lexer NUL/
   byte-progress cases. Existing compiler golden files remain unchanged.
 - Package inspection now requires the full prompt in each of the five binaries.
-- Real platform build/package result: pending follow-up CI. Earlier build evidence
-  above predates these UI changes and must not be used as proof of this revision.
+- [Follow-up CI 35608166744](https://github.com/coderunknow/GDCode/actions/runs/35608166744)
+  on `7ee09ae`: **all five real Geode targets built successfully, zero compiler
+  warnings**, host tests and packaging passed. The PR run `35608172864` also passed.
+  Package inspection confirmed the **complete prompt in every platform binary**,
+  including the Windows DLL. Package version is v0.2.0; size 1,746,199 bytes;
+  SHA-256 `f3ddabbccaaeba4880038a65325cf1eac93e6ebd604d67b0d52b9f3be35499d8`.
+  Results are CI evidence, not an in-game visual/clipboard test.
 - Host tests do not exercise actual window layout, clipboard integration, save
   dialogs or Undo in cocos. Those Windows-first acceptance checks remain below.
 
