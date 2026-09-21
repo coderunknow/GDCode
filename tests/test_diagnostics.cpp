@@ -122,3 +122,56 @@ TEST(empty_and_comment_only_sources_compile_to_empty_level) {
     CHECK(b.ir.empty());
     CHECK_EQ(b.ir.settings.name, std::string("Untitled"));
 }
+
+TEST(source_context_shows_typo_and_preserves_legacy_render) {
+    std::string src = "block 0 0\n  spirke 4 1\n";
+    LineIndex lines(src);
+    auto result = compile(src);
+    CHECK(!result.ok());
+    auto const& d = result.diagnostics.items().front();
+    auto text = d.renderWithSource(lines);
+    CHECK(text.starts_with(d.render()));
+    CHECK_CONTAINS(text, "did you mean: 'spike'");
+    CHECK_CONTAINS(text, "\n    2 |   spirke 4 1\n      |   ^");
+    CHECK(d.render().find(" | ") == std::string::npos);
+}
+
+TEST(source_context_tabs_crlf_and_control_bytes) {
+    std::string src = "# header\r\n\t\tspirke\x1b\x7f\xff\r\n";
+    LineIndex lines(src);
+    Diagnostic d;
+    d.span.begin = {2, 3};
+    CHECK_CONTAINS(d.renderWithSource(lines), "\n    2 |         spirke???\n      |         ^");
+}
+
+TEST(source_context_empty_eof_and_invalid_locations) {
+    for (std::string src : {"", "block 0 0", "block 0 0\n"}) {
+        LineIndex lines(src);
+        Diagnostic d;
+        d.span.begin = lines.posOf(src.size());
+        CHECK_CONTAINS(d.renderWithSource(lines), "^");
+        d.span.begin = {0, 0};
+        CHECK_EQ(d.renderWithSource(lines), d.render());
+        d.span.begin = {lines.lineCount() + 1, 1};
+        CHECK_EQ(d.renderWithSource(lines), d.render());
+        d.span.begin = {1, 0};
+        CHECK_EQ(d.renderWithSource(lines), d.render());
+        d.span.begin = {1, src.size() + 2};
+        CHECK_EQ(d.renderWithSource(lines), d.render());
+    }
+}
+
+TEST(source_context_long_line_is_bounded_around_caret) {
+    std::string src(10000, 'x');
+    src[5000] = '!';
+    LineIndex lines(src);
+    Diagnostic d;
+    d.span.begin = {1, 5001};
+    auto text = d.renderWithSource(lines);
+    CHECK(text.size() < 400);
+    CHECK_CONTAINS(text, "...");
+    CHECK_CONTAINS(text, "!");
+    CHECK_CONTAINS(text, "\n      | " + std::string(63, ' ') + "^");
+    d.span.begin = {1, 10001}; // EOF after a cropped line
+    CHECK_CONTAINS(d.renderWithSource(lines), "^");
+}

@@ -18,8 +18,8 @@ class EditorPopup : public geode::Popup {
 public:
     static EditorPopup* create(storage::Project project);
 
-    /// Called after the popup closes (the projects list refreshes itself).
-    void setOnClosed(std::function<void()> cb) { m_onClosed = std::move(cb); }
+    /// Called on close: true when leaving for GD, false to refresh the list.
+    void setOnClosed(std::function<void(bool)> cb) { m_onClosed = std::move(cb); }
 
 protected:
     bool init(storage::Project project);
@@ -27,6 +27,8 @@ protected:
     void keyDown(cocos2d::enumKeyCodes key, double timestamp) override;
 
 private:
+    void close(bool leaving, cocos2d::CCObject* sender = nullptr);
+
     // actions
     void onCheck(cocos2d::CCObject*);
     void onGenerate(bool forceNewLevel);
@@ -57,7 +59,7 @@ private:
     cocos2d::CCLabelBMFont* m_problemsTitle = nullptr;
     cocos2d::CCLabelBMFont* m_status = nullptr;
     cocos2d::CCLabelBMFont* m_position = nullptr;
-    std::function<void()> m_onClosed;
+    std::function<void(bool)> m_onClosed;
     bool m_dirty = false;
     bool m_generating = false;
     std::size_t m_lastErrorCount = 0;

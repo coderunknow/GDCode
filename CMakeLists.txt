@@ -10,7 +10,7 @@ else()
 endif()
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-project(GDCode VERSION 0.1.0)
+project(GDCode VERSION 0.2.0)
 
 # ----------------------------------------------------------------------------
 # Two build modes, one tree:

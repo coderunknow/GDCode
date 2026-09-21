@@ -1,4 +1,4 @@
-# Known limitations and verification notes (v0.1.0)
+# Known limitations and verification notes (v0.2.0)
 
 ## Scope (by design, MVP)
 
@@ -44,9 +44,13 @@
 - The **in-game behaviour has not been verified by the author yet**; the
   checklist below is what a release should be validated against.
 
+See [the v0.2.0 validation record](VALIDATION_v0.2.0.md) for release-specific
+build results and the expanded pause/resume/exit/re-entry matrix. Do not infer
+in-game success from CI or the host navigation doubles.
+
 ## In-game verification checklist
 
-Automated tests cover the compiler completely; the game-facing layer has to
+Automated tests cover many compiler cases, not all behavior; the game-facing layer has to
 be exercised in GD itself:
 
 1. Start GD with the mod - `</>` button visible in the main menu.

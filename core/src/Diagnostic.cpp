@@ -78,4 +78,31 @@ std::string Diagnostic::render() const {
     return out;
 }
 
+std::string Diagnostic::renderWithSource(LineIndex const& lines) const {
+    std::string out = render();
+    if (!span.valid() || span.begin.line > lines.lineCount() || span.begin.column == 0) return out;
+    auto line = lines.lineText(span.begin.line);
+    std::size_t column = span.begin.column - 1;
+    // A caret one past the last byte is meaningful for missing-token/EOF errors.
+    if (column > line.size()) return out;
+
+    constexpr std::size_t kWindow = 120;
+    std::size_t start = column > kWindow / 2 ? column - kWindow / 2 : 0;
+    std::size_t end = std::min(line.size(), start + kWindow);
+    std::string excerpt = start ? "..." : "";
+    std::size_t caret = excerpt.size();
+    for (std::size_t i = start; i < end; ++i) {
+        unsigned char c = static_cast<unsigned char>(line[i]);
+        std::size_t width = c == '\t' ? 4 : 1;
+        if (i < column) caret += width;
+        if (c == '\t') excerpt += "    ";
+        else excerpt += c >= 0x20 && c < 0x7f ? static_cast<char>(c) : '?';
+    }
+    if (end < line.size()) excerpt += "...";
+    std::string number = std::to_string(span.begin.line);
+    out += "\n    " + number + " | " + excerpt;
+    out += "\n    " + std::string(number.size(), ' ') + " | " + std::string(caret, ' ') + "^";
+    return out;
+}
+
 } // namespace gdcode

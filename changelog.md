@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.0
+
+- Fix native scene handoff: initialize GD's local-level return context, close GDCode modals and detach input before navigation; keep the editor open if navigation fails. Native Pause/Resume/Exit remain owned by GD.
+- Add `docs/AI_CODING_PROMPT.md`, a standalone coding-agent master prompt grounded in the repository.
+- Add CLI source-context diagnostics (source line + caret, tab/control-byte handling and bounded long-line excerpts); preserve quiet mode, legacy diagnostic rendering and generated output.
+- Add navigation-contract and CLI regression tests. See `docs/VALIDATION_v0.2.0.md` for evidence and outstanding in-game acceptance checks.
+
 ## v0.1.0
 
 Initial release.

@@ -8,7 +8,7 @@
 	},
 	"id": "coderunknow.gdcode",
 	"name": "GDCode",
-	"version": "v0.1.0",
+	"version": "v0.2.0",
 	"developer": "coderunknow",
 	"description": "Write levels as code: a small level-scripting language compiled into real, editable Geometry Dash levels.",
 	"tags": ["editor", "utility", "content"],

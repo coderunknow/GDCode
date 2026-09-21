@@ -38,10 +38,12 @@ int main(int argc, char** argv) {
     std::stringstream buf;
     buf << in.rdbuf();
 
-    auto result = gdcode::compile(buf.str());
+    std::string source = buf.str();
+    auto result = gdcode::compile(source);
     if (!quiet) {
+        gdcode::LineIndex lines(source);
         for (auto const& d : result.diagnostics.items()) {
-            std::cout << d.render() << "\n";
+            std::cout << d.renderWithSource(lines) << "\n";
         }
         std::cout << (result.ok() ? "OK" : "FAILED") << ": "
                   << result.stats.objectCount << " object(s), "

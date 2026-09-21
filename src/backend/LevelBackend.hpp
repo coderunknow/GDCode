@@ -8,6 +8,7 @@
 #include <Geode/Geode.hpp>
 
 #include "gdcode/Ir.hpp"
+#include "LevelNavigation.hpp"
 
 #include <cstdint>
 #include <optional>
@@ -49,11 +50,5 @@ WriteResult writeLevel(LevelIR const& ir, GJGameLevel* target);
 
 /// Hex FNV-1a 64 of a string (used for the level fingerprint).
 std::string fingerprint(std::string const& data);
-
-enum class AfterGenerate { OpenEditor, OpenLevelPage, Stay };
-AfterGenerate afterGenerateSetting();
-
-/// Perform the configured post-generation navigation.
-void openLevel(GJGameLevel* level, AfterGenerate how);
 
 } // namespace gdcode::backend

@@ -145,12 +145,18 @@ void EditorPopup::keyDown(enumKeyCodes key, double timestamp) {
 }
 
 void EditorPopup::onClose(CCObject* sender) {
+    close(false, sender);
+}
+
+void EditorPopup::close(bool leaving, CCObject* sender) {
+    Ref<EditorPopup> keepAlive = this;
     if (m_editor) m_editor->blur();
     this->unschedule(schedule_selector(EditorPopup::runAutosave));
     this->unschedule(schedule_selector(EditorPopup::runLiveCheck));
     if (m_dirty) saveProject(false);
-    if (m_onClosed) m_onClosed();
+    auto onClosed = std::move(m_onClosed);
     Popup::onClose(sender);
+    if (onClosed) onClosed(leaving);
 }
 
 // ---------------------------------------------------------------------------
@@ -484,9 +490,13 @@ void EditorPopup::writeAndOpen(LevelIR const& ir, GJGameLevel* target) {
             ->show();
         return;
     }
-    if (m_editor) m_editor->blur();
-    if (m_onClosed) m_onClosed();
-    backend::openLevel(written.level, how);
+    // Closing removes the scene's last owning references; keep this method's
+    // receiver alive until the synchronous handoff returns.
+    Ref<EditorPopup> keepAlive = this;
+    if (!backend::openLevel(written.level, how, [this] { close(true); })) {
+        Notification::create("Level saved in My Levels; could not open it now",
+                             NotificationIcon::Warning)->show();
+    }
 }
 
 } // namespace gdcode::ui

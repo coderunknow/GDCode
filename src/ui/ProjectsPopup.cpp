@@ -202,7 +202,12 @@ void ProjectsPopup::openProject(std::string const& id) {
     }
     auto* popup = EditorPopup::create(loaded.unwrap());
     if (!popup) return;
-    popup->setOnClosed([this] { reload(); });
+    popup->setOnClosed([self = WeakRef<ProjectsPopup>(this)](bool leaving) {
+        if (auto parent = self.lock()) {
+            if (leaving) parent->onClose(nullptr);
+            else parent->reload();
+        }
+    });
     popup->show();
 }
 

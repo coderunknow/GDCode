@@ -6,7 +6,7 @@
 - For the mod: [Geode SDK](https://docs.geode-sdk.org/getting-started/) v5.10.x
   and the Geode CLI. Geode requires Clang >= 19 (Windows/macOS/Android) or
   MSVC >= 19.44; see the Geode docs.
-- For the compiler core + tests only: any C++20 compiler (GCC 12 works).
+- For the compiler core + tests only: GCC 12 works (root CMake selects C++23, core uses C++20 features).
 
 ## Mod (`.geode`)
 
@@ -44,7 +44,7 @@ be removed without affecting the build.
 ## Compiler core, tests and CLI (no game needed)
 
 ```sh
-cmake -S . -B build-core -G Ninja -DCMAKE_BUILD_TYPE=Debug
+env -u GEODE_SDK cmake -S . -B build-core -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build-core
 ctest --test-dir build-core --output-on-failure
 ./build-core/gdcode-cli examples/hello.gdx --level-string
@@ -65,3 +65,19 @@ and review the diff.
 2. Copy `coderunknow.gdcode.geode` into `<GD folder>/geode/mods/`
    (or drag it onto the Geode mods window).
 3. Start the game; the `</>` button appears in the main menu.
+
+## v0.2.0 validation
+
+`ctest` includes the seven compiler suites plus navigation-contract and CLI
+integration tests. Native pause/exit must still be tested in GD; see
+[VALIDATION_v0.2.0.md](VALIDATION_v0.2.0.md). Host ASan/UBSan check:
+
+```sh
+env -u GEODE_SDK cmake -S . -B build-sanitize -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -fno-pie" \
+  -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined -no-pie"
+cmake --build build-sanitize --parallel
+ctest --test-dir build-sanitize --output-on-failure
+```
+
+The non-PIE flags here are for Linux host sanitizer runs, not mod builds.
