@@ -29,6 +29,11 @@ struct Diagnostic {
     /// Human-readable rendering, e.g.
     /// error[unknown-object]: line 8, column 1: unknown object type 'spirke'
     std::string render() const;
+
+    /// CLI-friendly rendering with a bounded source excerpt and caret at the
+    /// diagnostic's start. Tabs display as four spaces; control/non-ASCII bytes
+    /// as '?'. Invalid locations fall back to render(). Source must outlive lines.
+    std::string renderWithSource(LineIndex const& lines) const;
 };
 
 /// Collects diagnostics. Parsing/semantic analysis never aborts on the first

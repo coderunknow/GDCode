@@ -133,33 +133,4 @@ WriteResult writeLevel(LevelIR const& ir, GJGameLevel* target) {
     return result;
 }
 
-AfterGenerate afterGenerateSetting() {
-    auto value = Mod::get()->getSettingValue<std::string>("after-generate");
-    if (value == "level-page") return AfterGenerate::OpenLevelPage;
-    if (value == "stay") return AfterGenerate::Stay;
-    return AfterGenerate::OpenEditor;
-}
-
-void openLevel(GJGameLevel* level, AfterGenerate how) {
-    if (!level) return;
-    CCScene* scene = nullptr;
-    switch (how) {
-        case AfterGenerate::OpenEditor:
-            // Same call EditLevelLayer::onEdit makes.
-            scene = LevelEditorLayer::scene(level, false);
-            break;
-        case AfterGenerate::OpenLevelPage:
-            // Same scene the game shows right after "New" in My Levels.
-            scene = EditLevelLayer::scene(level);
-            break;
-        case AfterGenerate::Stay:
-            return;
-    }
-    if (!scene) {
-        log::error("GDCode: failed to create the target scene");
-        return;
-    }
-    CCDirector::sharedDirector()->replaceScene(CCTransitionFade::create(0.5f, scene));
-}
-
 } // namespace gdcode::backend

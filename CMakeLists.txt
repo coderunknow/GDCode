@@ -10,7 +10,14 @@ else()
 endif()
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-project(GDCode VERSION 0.1.0)
+project(GDCode VERSION 0.2.0)
+
+# Embed the whole prompt in the binary: players need neither repo files nor a
+# network connection. Reconfigure automatically when the canonical text changes.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS docs/AI_CODING_PROMPT.md)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/docs/AI_CODING_PROMPT.md" GDCODE_AI_PROMPT)
+configure_file(src/content/AiCodingPrompt.hpp.in generated/AiCodingPrompt.hpp @ONLY)
+
 
 # ----------------------------------------------------------------------------
 # Two build modes, one tree:
@@ -31,6 +38,7 @@ if (GDCODE_MOD_MODE)
 
     file(GLOB_RECURSE MOD_SOURCES CONFIGURE_DEPENDS src/*.cpp)
     add_library(${PROJECT_NAME} SHARED ${MOD_SOURCES})
+    target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
     add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 

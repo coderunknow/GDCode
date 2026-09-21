@@ -174,21 +174,14 @@ void CodeEditor::textChanged() {
     if (m_onChange) m_onChange();
 }
 
-void CodeEditor::setText(std::string const& text) {
-    m_text = text;
-    // Normalise line endings so the line index and the compiler agree.
-    std::string normalised;
-    normalised.reserve(m_text.size());
-    for (std::size_t i = 0; i < m_text.size(); ++i) {
-        if (m_text[i] == '\r') {
-            if (i + 1 < m_text.size() && m_text[i + 1] == '\n') continue;
-            normalised += '\n';
-        } else {
-            normalised += m_text[i];
-        }
+bool CodeEditor::setText(std::string const& text) {
+    auto normalised = prepareEditorText(text);
+    if (!normalised) {
+        Notification::create("Source exceeds 200k characters - nothing changed",
+                             NotificationIcon::Warning)->show();
+        return false;
     }
-    m_text = std::move(normalised);
-    if (m_text.size() > kMaxEditorChars) m_text.resize(kMaxEditorChars);
+    m_text = std::move(*normalised);
     m_cursor = 0;
     m_preferredColumn = 0;
     m_firstVisibleLine = 0;
@@ -198,6 +191,18 @@ void CodeEditor::setText(std::string const& text) {
     m_highlightLine.reset();
     rebuildLineIndex();
     refresh();
+    return true;
+}
+
+bool CodeEditor::replaceText(std::string const& text) {
+    auto normalised = prepareEditorText(text);
+    if (!normalised) {
+        Notification::create("Source exceeds 200k characters - nothing changed",
+                             NotificationIcon::Warning)->show();
+        return false;
+    }
+    applyEdit(0, m_text.size(), *normalised, false);
+    return true;
 }
 
 void CodeEditor::insertAtCursor(std::string const& text) {

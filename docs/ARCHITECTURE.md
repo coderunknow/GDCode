@@ -68,6 +68,13 @@ among the local levels; if its fingerprint still matches, it is updated in
 place (optionally after a confirmation); if it changed - the user edited it in
 the editor - the UI offers overwrite vs. new level.
 
+`LevelNavigation::openLevel` is the native lifecycle boundary. It initializes
+GD's return context (3 for direct editor, 2 for local level page), builds the
+destination and synchronously closes both source popups before replacement.
+Failure restores context and leaves source UI available. Native GD owns play,
+pause, resume and exit; there is no GDCode gameplay interpreter. See the
+[master prompt](AI_CODING_PROMPT.md) and [validation matrix](VALIDATION_v0.2.0.md).
+
 ### `src/storage/`
 
 ```
@@ -90,7 +97,13 @@ Plain files so users can back up, share and edit them externally.
   New Level, Copy, Paste, Undo, Help). Autosaves 1.5 s after changes and on
   close; recompiles 0.45 s after changes.
 - `ProjectsPopup` - project list, New / Import clipboard / Folder / delete.
-- `HelpPopup` - language reference generated from the object catalog.
+- `HelpPopup` - wrapped language reference generated from the object catalog.
+- `AiPromptPopup` - scrollable offline coding-agent prompt plus Copy Prompt;
+  opened from Projects or Help. CMake embeds the canonical prompt into a generated
+  header, so the installed mod never needs to read a repository file.
+- `EditorText.hpp` - shared, host-testable line-ending normalization and 200k
+  limit check. Oversized loads/pastes are rejected, not truncated. Replacing
+  pasted text uses the existing undo machinery.
 
 ## Testing strategy
 
@@ -98,6 +111,9 @@ Plain files so users can back up, share and edit them externally.
   encoder (including byte-identical records against decoded official level
   data), diagnostics (including a deterministic garbage-input fuzz loop),
   golden snapshots of IR + level string + diagnostics for four scripts.
+- Navigation contract tests compile the production handoff against an API double;
+  CLI integration tests verify source excerpts, exit codes and quiet behavior.
+  These are not a substitute for native lifecycle/input tests.
 - CI builds the real `.geode` for Windows, macOS, iOS, Android32/64 and
   publishes the combined package as an artifact.
 - In-game verification (manual, see `docs/LIMITATIONS.md` for the checklist).

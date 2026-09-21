@@ -1,0 +1,6 @@
+#pragma once
+
+// Generated at configure time from the canonical prompt. No runtime file I/O.
+namespace gdcode::content {
+inline constexpr char kAiCodingPrompt[] = R"GDCODE_PROMPT(@GDCODE_AI_PROMPT@)GDCODE_PROMPT";
+}

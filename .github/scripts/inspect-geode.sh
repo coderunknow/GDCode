@@ -12,6 +12,7 @@ set -uo pipefail
 dir="${1:?directory with .geode files}"
 report="${2:-/dev/stdout}"
 status=0
+source_root="$(cd "$(dirname "$0")/../.." && pwd)"
 
 shopt -s nullglob
 files=("$dir"/*.geode)
@@ -66,6 +67,22 @@ for pkg in "${files[@]}"; do
 
     # Every binary must actually be a shared library of the right kind.
     unzip -oq "$pkg" -d "pkg-contents"
+    # The in-game prompt must be present even without any external .md file.
+    if python3 - "$source_root/docs/AI_CODING_PROMPT.md" "$mod_id" <<'PYTHON'
+import pathlib
+import sys
+prompt = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").encode("utf-8")
+for suffix in (".dll", ".dylib", ".ios.dylib", ".android32.so", ".android64.so"):
+    binary = pathlib.Path("pkg-contents") / (sys.argv[2] + suffix)
+    if not binary.exists() or prompt not in binary.read_bytes():
+        sys.exit(f"Full AI prompt missing from {binary}")
+PYTHON
+    then
+        echo "- :white_check_mark: full offline AI prompt embedded in all five binaries" >> "$report"
+    else
+        echo "- :x: embedded AI prompt verification failed" >> "$report"
+        status=1
+    fi
     {
         echo
         echo '```text'

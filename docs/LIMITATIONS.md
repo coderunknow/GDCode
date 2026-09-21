@@ -1,4 +1,4 @@
-# Known limitations and verification notes (v0.1.0)
+# Known limitations and verification notes (v0.2.0)
 
 ## Scope (by design, MVP)
 
@@ -17,6 +17,15 @@
   compiler rejects non-ASCII with a positioned error.
 
 ## Behaviour to be aware of
+
+- **Editor size cap:** scripts longer than 200k characters after line-ending
+  normalization cannot open in the in-game editor. They remain intact on disk;
+  use Folder/external editing or the CLI. Oversize Replace Paste is rejected too.
+- **Failed saves:** closing offers Keep editing or explicit Discard; use Copy to
+  rescue edits before discarding. The two project files are not an atomic pair.
+- **AI Prompt:** bundled offline and available from Projects/Help. Copy depends
+  on the platform clipboard; failure is reported without closing the reader.
+
 
 - **Level linking is by name + fingerprint.** If you rename the generated
   level in GD, GDCode cannot find it again and creates a new one. If you edit
@@ -44,9 +53,13 @@
 - The **in-game behaviour has not been verified by the author yet**; the
   checklist below is what a release should be validated against.
 
+See [the v0.2.0 validation record](VALIDATION_v0.2.0.md) for release-specific
+build results and the expanded pause/resume/exit/re-entry matrix. Do not infer
+in-game success from CI or the host navigation doubles.
+
 ## In-game verification checklist
 
-Automated tests cover the compiler completely; the game-facing layer has to
+Automated tests cover many compiler cases, not all behavior; the game-facing layer has to
 be exercised in GD itself:
 
 1. Start GD with the mod - `</>` button visible in the main menu.

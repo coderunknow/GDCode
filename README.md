@@ -59,6 +59,16 @@ repeat 6 as k {
 5. **Generate**. The level opens in the editor (or its level page / nothing - see the mod settings).
 6. Edit the script and **Generate** again to update the same level; **New Level** creates a separate one.
 
+Exit generated content using GD's native pause menu (Resume / Save and Exit / Quit
+as appropriate). Return through the local level screens to the main menu, then
+reopen **`</>`** to continue your saved script.
+
+Press **AI Prompt** in the project list, or **? -> AI Prompt** in the editor,
+for a scrollable AI coding-agent prompt. **Copy Prompt** copies the full text to
+your Windows/system clipboard for pasting into an AI conversation. It works
+offline, is bundled inside the mod, and requires no Markdown file. This prompt
+is for developing the GDCode mod (not generating level scripts).
+
 Press **?** in the editor for the built-in reference. Full syntax: [docs/DSL.md](docs/DSL.md).
 
 Settings (Geode mod settings): *After generating a level* (`editor` / `level-page` / `stay`),
@@ -74,10 +84,10 @@ src/       the Geode mod
   storage/          ProjectStore: projects on disk
   ui/               CodeEditor, EditorPopup, ProjectsPopup, HelpPopup
   main.cpp          MenuLayer button
-tests/     7 host-side test suites + golden snapshots (no game needed)
+tests/     compiler, navigation-contract and CLI tests + golden snapshots
 cli/       gdcode-cli: compile scripts from a terminal
 examples/  sample scripts
-docs/      DSL.md (language), ARCHITECTURE.md, BUILD.md, LIMITATIONS.md
+docs/      DSL, architecture, build, AI coding prompt and validation records
 ```
 
 ## Build
@@ -88,7 +98,7 @@ Mod (needs the Geode SDK + CLI, Clang 19 / MSVC 19.44 per Geode's requirements):
 geode build
 ```
 
-Compiler core, tests and CLI (any C++20 compiler, no game):
+Compiler core, tests and CLI (GCC 12 works; root CMake selects C++23, no game):
 
 ```sh
 cmake -S . -B build-core -G Ninja -DCMAKE_BUILD_TYPE=Debug
@@ -100,6 +110,22 @@ ctest --test-dir build-core --output-on-failure
 CI (`.github/workflows/build.yml`) runs the tests and builds the mod for Windows, macOS, iOS,
 Android32 and Android64, then uploads the combined `.geode` as the artifact
 **GDCode (all platforms)**. Details: [docs/BUILD.md](docs/BUILD.md).
+
+## CLI diagnostics
+
+The CLI shows source lines and carets for positioned diagnostics, including
+suggestions. Tabs display as four spaces; long lines are cropped around the error.
+`--quiet` still suppresses diagnostics; IR and level-string formats are unchanged.
+
+```text
+error[unknown-object]: line 1, column 1: unknown object type 'spirke'
+    did you mean: 'spike'
+    1 | spirke 4 1
+      | ^
+```
+
+The canonical source for the in-game prompt remains
+[docs/AI_CODING_PROMPT.md](docs/AI_CODING_PROMPT.md); CMake embeds it in the mod.
 
 ## How the level is produced
 
@@ -119,7 +145,11 @@ verification checklist in [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 
 ## Status
 
-v0.1.0 - MVP. Triggers, a bigger object catalogue, conditionals and a block-based editor
+v0.2.0 - native navigation handoff fix, AI onboarding prompt and CLI source-context
+diagnostics. In-game acceptance remains required; see the
+[v0.2.0 validation record](docs/VALIDATION_v0.2.0.md).
+
+Triggers, a bigger object catalogue, conditionals and a block-based editor
 are intentionally out of scope for this version; the IR and catalog are designed so they can
 be added as data.
 

@@ -151,10 +151,10 @@ jobs:
           3. Restart the game and press the green \`</>\` button in the main menu.
 
           ### This release
-          - GDCode language (level settings, objects, \`var\`, \`repeat\`, \`define\`, \`random\`).
-          - In-game code editor with live problems panel and click-to-jump diagnostics.
-          - Project storage in the mod save folder; regenerate a level in place with confirmation.
-          - Built for Windows, macOS, iOS and Android (32/64-bit) with zero compiler warnings.
+          - Correct native local-level return context and GDCode popup cleanup on scene handoff.
+          - Offline in-game AI Prompt reader and Copy button from Projects and Help.
+          - CLI diagnostics with source excerpts; fixes for NUL hangs, oversized source loss and editor modal/save handling.
+          - Built for Windows, macOS, iOS and Android (32/64-bit); see CI for build diagnostics.
 
           ### Documentation
           - Language reference: [\`docs/DSL.md\`](${repo}/blob/${tag}/docs/DSL.md)
@@ -162,7 +162,7 @@ jobs:
           - Known limitations & in-game verification checklist:
             [\`docs/LIMITATIONS.md\`](${repo}/blob/${tag}/docs/LIMITATIONS.md)
 
-          Initial release; please report anything that does not work via the issue tracker.
+          See [the validation record](${repo}/blob/${tag}/docs/VALIDATION_v0.2.0.md) for test evidence and in-game acceptance status.
           EOF
           out="$(gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "GDCode $tag" --notes-file release-notes.md "$pkg" 2>&1)" && status=0 || status=$?
           echo "$out"

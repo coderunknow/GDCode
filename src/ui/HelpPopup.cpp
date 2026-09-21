@@ -1,4 +1,5 @@
 #include "HelpPopup.hpp"
+#include "AiPromptPopup.hpp"
 
 #include "gdcode/Catalog.hpp"
 
@@ -64,12 +65,12 @@ bool HelpPopup::init() {
         "  Arrows/Home/End/PgUp/PgDn move, Tab indents, Enter auto-indents,\n"
         "  Ctrl+V pastes, Ctrl+Z / Ctrl+Y undo / redo. Tap a problem to jump to it.\n";
 
-    auto* scroll = ScrollLayer::create({396.f, 226.f});
+    auto* scroll = ScrollLayer::create({396.f, 190.f});
     scroll->m_contentLayer->setLayout(ScrollLayer::createDefaultListLayout(0.f));
     scroll->setTouchEnabled(true);
 
     auto* area = SimpleTextArea::create(text, "chatFont.fnt", 0.5f, 388.f);
-    area->setWrappingMode(WrappingMode::NO_WRAP);
+    area->setWrappingMode(WrappingMode::WORD_WRAP);
     area->setAnchorPoint({0.f, 0.5f});
     auto* holder = CCNode::create();
     holder->setContentSize({396.f, area->getHeight() + 8.f});
@@ -80,9 +81,16 @@ bool HelpPopup::init() {
     auto* bg = CCScale9Sprite::create("square02b_001.png", {0, 0, 80, 80});
     bg->setColor({0, 0, 0});
     bg->setOpacity(110);
-    bg->setContentSize({404.f, 234.f});
-    m_mainLayer->addChildAtPosition(bg, Anchor::Center, {0.f, -10.f});
+    bg->setContentSize({404.f, 198.f});
+    m_mainLayer->addChildAtPosition(bg, Anchor::Center, {0.f, 6.f});
     bg->addChildAtPosition(scroll, Anchor::BottomLeft, {4.f, 4.f});
+    auto* sprite = ButtonSprite::create("AI Prompt", 100, 0, 0.55f, true,
+                                         "bigFont.fnt", "GJ_button_04.png", 26.f);
+    auto* prompt = CCMenuItemExt::createSpriteExtra(sprite, [](auto) {
+        if (auto* popup = AiPromptPopup::create()) popup->show();
+    });
+    prompt->setID("ai-prompt-button"_spr);
+    m_buttonMenu->addChildAtPosition(prompt, Anchor::Bottom, {0.f, 22.f});
     scroll->scrollToTop();
     handleTouchPriority(this);
     return true;

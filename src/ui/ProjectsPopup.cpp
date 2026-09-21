@@ -2,6 +2,7 @@
 
 #include "EditorPopup.hpp"
 #include "HelpPopup.hpp"
+#include "AiPromptPopup.hpp"
 
 #include <Geode/ui/Notification.hpp>
 #include <Geode/utils/file.hpp>
@@ -127,9 +128,14 @@ bool ProjectsPopup::init() {
         auto* spr = ButtonSprite::create(text, static_cast<int>(width), 0, 0.55f, true, "bigFont.fnt", bgName, 26.f);
         return CCMenuItemExt::createSpriteExtra(spr, [cb = std::move(cb)](auto) { cb(); });
     };
-    row->addChild(button("New", "GJ_button_01.png", 70.f, [this] { onNew(nullptr); }));
-    row->addChild(button("Import clipboard", "GJ_button_04.png", 130.f, [this] { onImportClipboard(nullptr); }));
-    row->addChild(button("Folder", "GJ_button_04.png", 70.f, [this] { onOpenFolder(nullptr); }));
+    row->addChild(button("New", "GJ_button_01.png", 55.f, [this] { onNew(nullptr); }));
+    row->addChild(button("Import clipboard", "GJ_button_04.png", 110.f, [this] { onImportClipboard(nullptr); }));
+    row->addChild(button("Folder", "GJ_button_04.png", 60.f, [this] { onOpenFolder(nullptr); }));
+    auto* prompt = button("AI Prompt", "GJ_button_04.png", 80.f, [] {
+        if (auto* popup = AiPromptPopup::create()) popup->show();
+    });
+    prompt->setID("ai-prompt-button"_spr);
+    row->addChild(prompt);
     row->addChild(button("?", "GJ_button_05.png", 30.f, [] { HelpPopup::create()->show(); }));
     row->updateLayout();
 
@@ -202,7 +208,12 @@ void ProjectsPopup::openProject(std::string const& id) {
     }
     auto* popup = EditorPopup::create(loaded.unwrap());
     if (!popup) return;
-    popup->setOnClosed([this] { reload(); });
+    popup->setOnClosed([self = WeakRef<ProjectsPopup>(this)](bool leaving) {
+        if (auto parent = self.lock()) {
+            if (leaving) parent->onClose(nullptr);
+            else parent->reload();
+        }
+    });
     popup->show();
 }
 
