@@ -18,8 +18,8 @@ struct VariantInfo {
 ///
 /// The compiler is table-driven: adding an object is adding a row here, not
 /// adding an if/else branch in the parser. Every gdId in this table is cross
-/// checked by tools/check_gd_api.py against the community-verified dataset
-/// (see docs/DATA-SOURCES.md).
+/// checked by tools/check_gd_api.py against a community-maintained object-id
+/// dataset (see the docstring of that script).
 struct ObjectSpec {
     std::string_view type;
     /// Used when the statement names no variant; -1 = a variant is required.

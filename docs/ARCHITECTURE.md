@@ -42,7 +42,9 @@ Design rules:
 - **Never throws, never hangs**: all failures are diagnostics; all loops are
   bounded by `Limits`.
 - **Table-driven**: adding an object = adding a catalog row. Settings and
-  properties are small dispatch tables inside `Lowering`.
+  properties are small dispatch tables inside `Lowering`. The GD ids in the
+  catalog can be cross-checked against an object-id dataset with
+  `python3 tools/check_gd_api.py <objects.csv>`.
 - **IR is GD-agnostic in shape**: key/value style objects, so triggers or other
   object kinds can be added later as data without touching the front end.
 

@@ -13,7 +13,7 @@
 	"description": "Write levels as code: a small level-scripting language compiled into real, editable Geometry Dash levels.",
 	"tags": ["editor", "utility", "content"],
 	"links": {
-		"source": "https://github.com/coderunknow/Test-geode-mod"
+		"source": "https://github.com/coderunknow/GDCode"
 	},
 	"dependencies": {
 		"geode.node-ids": ">=v1.23.3"

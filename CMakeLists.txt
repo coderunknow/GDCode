@@ -34,7 +34,10 @@ if (GDCODE_MOD_MODE)
 
     file(GLOB_RECURSE MOD_SOURCES CONFIGURE_DEPENDS src/*.cpp)
     add_library(${PROJECT_NAME} SHARED ${MOD_SOURCES})
-    target_link_libraries(${PROJECT_NAME} PRIVATE gdcode_core)
+    # Plain (keyword-less) signature on purpose: setup_geode_mod() links
+    # geode-sdk with the plain signature and CMake forbids mixing the two forms
+    # on one target.
+    target_link_libraries(${PROJECT_NAME} gdcode_core)
 
     add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
     setup_geode_mod(${PROJECT_NAME})
