@@ -58,10 +58,26 @@ CLI normal/error/quiet outputs and exit codes; unchanged legacy render/goldens.
   empty/EOF/invalid locations and long-line cropping. CLI integration verifies
   error status 1, successful generation/summary and unchanged quiet output.
 - Navigation contract: six cases pass (production code against API doubles).
+  Negative control with the two route assignments removed fails the editor/page
+  cases as expected. This catches the v0.1.0 entry defect, not the native symptom.
 - `git diff --check`: clean; no generated artifacts or golden changes.
 - Manifest/CMake version: **v0.2.0 / 0.2.0**, Geode/GD requirements unchanged.
-- Real five-platform Geode build/package: pending CI. Native in-game tests: blocked
-  by lack of GD runtime. Release readiness is **not** asserted.
+- [Geode CI run 35606128088](https://github.com/coderunknow/GDCode/actions/runs/35606128088)
+  on implementation commit `b4f27da`: **Windows, macOS, iOS, Android32 and Android64
+  all built successfully**; core tests, packaging and CI report passed. **Zero
+  compiler warnings** reported. Only infrastructure notices about the future
+  Ubuntu runner-image migration; tag-only release job skipped as expected.
+- CI inspected the combined `coderunknow.gdcode.geode`: zip integrity, all five
+  platform binaries and resources passed; packaged manifest is **v0.2.0** with
+  Geode 5.10.1 / GD 2.2081. Size: 1,677,961 bytes; SHA-256:
+  `509b0a0c3ff82751623250d34e12c776e242ca8a95c6c0aa866c1e47404d1b3b`.
+  Reports are posted as comments on that commit, accessible through the GitHub API.
+- Downloading that artifact into this sandbox failed with an EOF from the Actions
+  storage host. Package inspection above ran **in CI**, not locally; no binary is
+  committed or claimed to have been installed in-game.
+- Native in-game tests remain blocked by lack of GD runtime. This is a **release
+  candidate for review**, not a claim that all requested acceptance checks passed.
+  Do not publish a release tag until the manual matrix below has been exercised.
 
 ## In-game acceptance matrix — NOT RUN (release gate)
 
